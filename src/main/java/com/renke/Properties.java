@@ -42,7 +42,11 @@ public class Properties extends HashMap<String, String>  {
 	}
 	
 	public void load(String filePath,boolean isDir) throws IOException {
-		File[] files = null; 
+		File[] files = null;
+		//Linux
+		if(!filePath.startsWith("/")){
+			filePath = Properties.class.getResource("/").getPath()+filePath;
+		}
 		File file = new File(filePath);
 		if(isDir){
 			files = file.listFiles();

@@ -1,6 +1,5 @@
 package com.renke;
 
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
@@ -22,11 +21,20 @@ public class ServerChannel {
 		.append("Date: Sat, 31 Dec 2005 23:59:59 GMT\r\n")
 		.append("Content-Type: text/html;charset=").append(encode).append("\r\n")
 		.append("Content-Length:").append(msg.getBytes(encode).length * 2).append("\r\n")
-		.append("\r\n")
-		.append(msg);
+		.append("\r\n").append(msg);
 		return sb.toString();
 	}
 	
+	/**
+	 * 
+	 * 
+	 * @author renke.zuo@foxmail.com
+	 * @time 2016-07-27 09:28:55
+	 * @param ssc
+	 * @param msg
+	 * @param encode
+	 * @throws IOException
+	 */
 	public static void doSth(ServerSocketChannel ssc,String msg,String encode) throws IOException{
 		SocketChannel sc = ssc.accept();
 		logger.info("localAddress:{}",sc.getLocalAddress());
@@ -54,7 +62,6 @@ public class ServerChannel {
 		logger.info("---over---");
 		if(sc.isOpen()) sc.close();
 	}
-	
 	
 	
 	public static void startSimpleServer()throws IOException, InterruptedException{
@@ -132,35 +139,35 @@ public class ServerChannel {
 	}
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
-		Thread t1 = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					ServerChannel.startSelectorServer();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		});
-		Thread t2 = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					ServerChannel.startSimpleServer();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		});
-		t1.start();
-		t2.start();
+//		Thread t1 = new Thread(new Runnable() {
+//			@Override
+//			public void run() {
+//				try {
+//					ServerChannel.startSelectorServer();
+//				} catch (IOException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				} catch (InterruptedException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//			}
+//		});
+//		Thread t2 = new Thread(new Runnable() {
+//			@Override
+//			public void run() {
+//				try {
+//					ServerChannel.startSimpleServer();
+//				} catch (IOException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				} catch (InterruptedException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//			}
+//		});
+//		t1.start();
+//		t2.start();
 	}
 }
