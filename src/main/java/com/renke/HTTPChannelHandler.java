@@ -1,6 +1,5 @@
 package com.renke;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
@@ -8,6 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import com.renke.api.ChannelHandler;
 import com.renke.constant.HTTPConstant;
 import com.renke.exception.HTTPException;
+import com.renke.exception.HandlerException;
 import com.renke.util.CollectionUtil;
 import com.renke.util.StringHex;
 
@@ -79,7 +80,6 @@ public class HTTPChannelHandler implements ChannelHandler {
 			//将limit设置为position，将position设置为0，将mark设置为-1
 			//现在读取数组就是，从0开始，读取limit个数据
 			request.flip();
-			
 			System.arraycopy(request.array(),0, tmp,beginIndex,len);
 			//剩余总长度
 			countLen = beginIndex + len;
@@ -117,21 +117,19 @@ public class HTTPChannelHandler implements ChannelHandler {
 			if(beginIndex < countLen && !hasSpace) {
 				System.arraycopy(tmp, beginIndex, tmp,0,countLen-beginIndex);
 			}
-			
 			/**
 			 * FIXME 需要判断request的有效性。
 			 */
-			
 			if(hasSpace){
 				//解析完毕，则直接结束
 				if(resolveRequstByBytes(tmpList,result)) break;
 			}
 			
 		}
-		//FIXME 此处默认了编码格式，需要修改，使用gzip的方式，也没有处理
 		request = null;
 		tmp = null;
 		tmpList = null;
+		socketChannel.shutdownInput();
 		logger.debug("resolveRequest Time:{} ms",System.currentTimeMillis()-begin);
 		return result;
 	}
@@ -146,49 +144,53 @@ public class HTTPChannelHandler implements ChannelHandler {
 	 * @throws Exception
 	 */
 	@Override
-	public <DATA> void assembleData(DATA data,SocketChannel socketChannel) throws Exception {
+	public byte[] assembleData(byte[] data) throws Exception {
 		String encoding = Controller.encoding;
-		// TODO Auto-generated method stub
-		String msg = "";
-		if(data instanceof Exception){
-			msg = ((Exception) data).getMessage();
-		}else{
-			msg = "你好，世界！Hello China!";
-		}
-		int length = msg.getBytes(encoding).length;
-		String respone = getResponseHead(length,encoding);
-		socketChannel.write(ByteBuffer.wrap(respone.getBytes(encoding)));
-		socketChannel.write(ByteBuffer.wrap(msg.getBytes(encoding)));
+		int length = data.length;
+		byte[] response = getResponseHead(length,encoding);
+		byte[] result = new byte[response.length + length];
+		System.arraycopy(response, 0, result, 0, response.length);
+		System.arraycopy(data, 0, result, response.length, length);
+		return result;
+//		socketChannel.write(ByteBuffer.wrap(respone.getBytes(encoding)));
+//		socketChannel.write(ByteBuffer.wrap(result));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T handle(T t) {
-		if(!(t instanceof SocketChannel)) return null;
-		SocketChannel socketChannel = (SocketChannel) t;
-		try{
-			Map<String,Object> request = resolveSocketChannel(socketChannel);
-			socketChannel.shutdownInput();
-			//处理request
-			String map = CollectionUtil.mapToString(request);
-			logger.info("result: \r\n{}",map);
-			
-			assembleData(request,socketChannel);
-			return null;
-		}catch( Exception e ){
-			try {
-				e.printStackTrace();
-				assembleData(e,socketChannel);
-			} catch (Exception e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+	public <T> byte[] handle(T t) throws HandlerException{
+		if(!(t instanceof Map)) return null;
+		String encoding = Controller.encoding;
+		Map<String,Object> map = (Map<String, Object>) t;
+		Iterator<String> it = map.keySet().iterator();
+		StringBuilder sb = new StringBuilder();
+		while(it.hasNext()){
+			String key = it.next();
+			Object obj = map.get(key);
+			if(obj instanceof String){
+				sb.append(key).append("=[").append(obj).append("];");
 			}
-			return null;
-		}finally{
-			try {
-				socketChannel.close();
-			} catch (IOException e) {
-				e.printStackTrace();
+			if(obj instanceof LinkedNodeQueue){
+				LinkedNode[] lna = ( (LinkedNodeQueue) obj).toArray();
+				sb.append(key).append("=[");
+				for(int i=0;i<lna.length;i++){
+					LinkedNode ln = lna[i];
+					if(i<lna.length-1)
+						sb.append(ln.getData()).append(",");
+					else
+						sb.append(ln.getData());
+				}
+				sb.append("];");
 			}
+		}
+		String result = sb.toString();
+		//处理request
+//		String result = CollectionUtil.mapToString(map);
+		logger.info("result: \r\n{}",result);
+		try {
+			return result.getBytes(encoding);
+		} catch (UnsupportedEncodingException e) {
+			throw new HandlerException(e);
 		}
 	}
 	
@@ -239,7 +241,7 @@ public class HTTPChannelHandler implements ChannelHandler {
 				map.put(param_name, lnq);
 				index = 0;
 			}else if(data[i]=='+'){
-				tmp[index] = ' ';
+				tmp[index++] = ' ';
 			}else{
 				tmp[index++] = data[i];
 			}
@@ -379,14 +381,14 @@ public class HTTPChannelHandler implements ChannelHandler {
 	 * @return
 	 * @throws UnsupportedEncodingException
 	 */
-	private static String getResponseHead(int length,String encoding) throws UnsupportedEncodingException{
+	private static byte[] getResponseHead(int length,String encoding) throws UnsupportedEncodingException{
 		StringBuilder sb = new StringBuilder();
 		sb.append("HTTP/1.1 200 OK\r\n")
 		.append("Date: ").append(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(System.currentTimeMillis())).append(" GMT+8\r\n")
 		.append("Content-Type: text/html;charset=").append(encoding).append("\r\n")
 		.append("Content-Length:").append(length).append("\r\n")
 		.append("\r\n");
-		return sb.toString();
+		return sb.toString().getBytes(encoding);
 	}
 	
 	/**

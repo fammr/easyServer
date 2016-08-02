@@ -65,7 +65,7 @@ public class Controller {
 					SelectionKey key = it.next();
 					ServerSocketChannel serverChannel = (ServerSocketChannel)key.channel();
 					SocketChannel socketChannel = serverChannel.accept();
-					Runnable r = new HTTPExcutor(socketChannel,sucess);
+					Runnable r = new HTTPExecutor(socketChannel,sucess);
 					es.execute(r);
 					it.remove();
 				}

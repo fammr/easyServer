@@ -1,4 +1,7 @@
 package com.renke.api;
+
+import com.renke.exception.HandlerException;
+
 public interface Handler {
-	public <T> T handle(T t) ;
+	public <T> byte[] handle(T t) throws HandlerException;
 }
