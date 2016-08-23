@@ -3,6 +3,7 @@ import com.renke.util.MyUnsafe;
 
 import sun.misc.Unsafe;
 
+@SuppressWarnings("restriction")
 public class LinkedNodeQueue{
 	private static final long headOffset;
     private static final long tailOffset;
