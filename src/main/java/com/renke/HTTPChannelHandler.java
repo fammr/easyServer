@@ -20,7 +20,6 @@ import com.renke.api.ChannelHandler;
 import com.renke.constant.HTTPConstant;
 import com.renke.exception.HTTPException;
 import com.renke.exception.HandlerException;
-import com.renke.util.CollectionUtil;
 import com.renke.util.StringHex;
 
 

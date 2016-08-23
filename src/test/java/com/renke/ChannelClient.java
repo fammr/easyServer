@@ -110,20 +110,20 @@ public class ChannelClient {
 	public static void main(String[] args) throws IOException {
 //		Thread t = new Thread(new BufferThread(8080));
 //		t.start();
-//		for(int i=0;i<300;i++){
-//			Thread t = new Thread(new BufferThread(8080));
-//			t.start();
-//			logger.info("thread---"+i);
-//		}
-		ObjectTest obj = new ObjectTest();
-		obj.setObj(new Object());
-
-		logger.info("obj is {}",obj.getObj());
-		
-		Thread t = new Thread(new RefThread(obj));
-		Thread t2 = new Thread(new ChangeRefThread(obj));
-		t.start();
-		t2.start();
+		for(int i=0;i<300;i++){
+			Thread t = new Thread(new BufferThread(8080));
+			t.start();
+			logger.info("thread---"+i);
+		}
+//		ObjectTest obj = new ObjectTest();
+//		obj.setObj(new Object());
+//
+//		logger.info("obj is {}",obj.getObj());
+//		
+//		Thread t = new Thread(new RefThread(obj));
+//		Thread t2 = new Thread(new ChangeRefThread(obj));
+//		t.start();
+//		t2.start();
 		
 	}
 }
