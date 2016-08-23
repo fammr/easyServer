@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<log4j:configuration xmlns:log4j='http://jakarta.apache.org/log4j/'>
+	
+	<appender name="consoleAppend" class="org.apache.log4j.ConsoleAppender">
+		<layout class="org.apache.log4j.PatternLayout">
+			<!-- log console style -->
+			<param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss} [%p] [%C{1}:%L] [%t] - %m%n" />
+		</layout>
+		<filter class="org.apache.log4j.varia.LevelRangeFilter">
+			<param name="LevelMin" value="ERROR" />
+			<param name="LevelMax" value="ERROR" />
+		</filter>
+	</appender>
+	
+	
+	<appender name="rollingAppend" class="org.apache.log4j.RollingFileAppender">
+		<param name="File" value="E:/logs/sockets/catalina.out" />
+		<param name="MaxBackupIndex" value="50" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<!-- log console style -->
+			<param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss} [%p] [%C{1}:%L] [%t] - %m%n" />
+		</layout>
+		<filter class="org.apache.log4j.varia.LevelRangeFilter">
+			<param name="LevelMin" value="DEBUG" />
+			<param name="LevelMax" value="ERROR" />
+		</filter>
+	</appender>
+	<!-- error failed to rename [E:/logs/sockets/catalina.out] to [E:/logs/sockets/catalina.out/201608/02/14/26.log] -->
+<!-- 	<appender name="dailyRollingAppend" class="org.apache.log4j.DailyRollingFileAppender"> -->
+<!-- 		<param name="File" value="E:/logs/sockets/catalina.out" /> -->
+<!-- 		<param name="DatePattern" value="'/'yyyyMM'/'dd'/'HH'/'mm'.log'" /> -->
+<!-- 		<layout class="org.apache.log4j.PatternLayout"> -->
+				<!-- log console style -->
+<!-- 			<param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss} [%p] [%C{1}:%L] [%t] - %m%n" /> -->
+<!-- 		</layout> -->
+<!-- 		<filter class="org.apache.log4j.varia.LevelRangeFilter"> -->
+<!-- 			<param name="LevelMin" value="DEBUG" /> -->
+<!-- 			<param name="LevelMax" value="ERROR" /> -->
+<!-- 		</filter> -->
+<!-- 	</appender> -->
+	<root>
+		<level  value="DEBUG"/>
+<!-- 		<appender-ref ref="dailyRollingAppend" /> -->
+		<appender-ref ref="rollingAppend" />
+		<appender-ref ref="consoleAppend" />
+	</root>
+</log4j:configuration>
